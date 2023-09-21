@@ -27,6 +27,7 @@ function getSafeFileName(title) {
 }
 
 async function downloadVideo(url, playlist) {
+    playlist = getSafeFileName(playlist);
     playlist = (playlist ? `${playlist}/` : '');
 
     if (!fs.existsSync(`${outputDirectory}${playlist}`)) {
