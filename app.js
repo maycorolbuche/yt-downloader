@@ -2,13 +2,22 @@ const fs = require('fs');
 const ytdl = require('ytdl-core');
 const ytpl = require('ytpl');
 
+type = "audio"; // video/audio
+
+let filetype = 'mp3';
+let quality = 'highestaudio';
+if (type == "video") {
+    filetype = 'mp4';
+    quality = 'highest';
+}
+
 const inputFile = 'urls.txt';
 if (!fs.existsSync(inputFile)) {
     fs.writeFileSync(inputFile, '', 'utf8');
 }
 
 // Diretório onde os vídeos serão salvos
-const outputDirectory = './videos/';
+const outputDirectory = './media/';
 if (!fs.existsSync(outputDirectory)) {
     fs.mkdirSync(outputDirectory);
 }
@@ -17,14 +26,20 @@ function getSafeFileName(title) {
     return title.replace(/[^\p{L}\d\s-]/gu, '').replace(/\s+/g, ' ');
 }
 
-async function downloadVideo(url) {
+async function downloadVideo(url, playlist) {
+    playlist = (playlist ? `${playlist}/` : '');
+
+    if (!fs.existsSync(`${outputDirectory}${playlist}`)) {
+        fs.mkdirSync(`${outputDirectory}${playlist}`);
+    }
+
     try {
         const title = getSafeFileName(await getVideoTitle(url));
-        const outputFilePath = `${outputDirectory}${title}.mp4`; // Nome do arquivo de saída com o título do vídeo
+        const outputFilePath = `${outputDirectory}${playlist}${title}.${filetype}`; // Nome do arquivo de saída com o título do vídeo
 
         console.log(`${title} | ⏳ Baixando vídeo`);
 
-        const stream = ytdl(url, { quality: 'highest' });
+        const stream = ytdl(url, { quality });
         const writeStream = fs.createWriteStream(outputFilePath);
 
         stream.pipe(writeStream);
@@ -53,7 +68,7 @@ async function downloadPlaylist(playlistUrl) {
 
         for (const video of videos) {
             const videoUrl = `https://www.youtube.com/watch?v=${video.id}`;
-            await downloadVideo(videoUrl);
+            await downloadVideo(videoUrl, playlistInfo.title);
         }
     } catch (err) {
         console.error('Erro ao baixar a lista de reprodução:', err);
