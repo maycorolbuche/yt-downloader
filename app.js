@@ -1,5 +1,6 @@
 const fs = require('fs');
 const ytdl = require('ytdl-core');
+const ytpl = require('ytpl');
 
 const inputFile = 'urls.txt';
 if (!fs.existsSync(inputFile)) {
@@ -12,9 +13,13 @@ if (!fs.existsSync(outputDirectory)) {
     fs.mkdirSync(outputDirectory);
 }
 
+function getSafeFileName(title) {
+    return title.replace(/[^\p{L}\d\s-]/gu, '').replace(/\s+/g, ' ');
+}
+
 async function downloadVideo(url) {
     try {
-        const title = await getVideoTitle(url);
+        const title = getSafeFileName(await getVideoTitle(url));
         const outputFilePath = `${outputDirectory}${title}.mp4`; // Nome do arquivo de saída com o título do vídeo
 
         console.log(`${title} | ⏳ Baixando vídeo`);
@@ -40,6 +45,21 @@ async function downloadVideo(url) {
     }
 }
 
+async function downloadPlaylist(playlistUrl) {
+    try {
+        const playlistInfo = await ytpl(playlistUrl);
+        const videos = playlistInfo.items;
+        console.log("📄 Baixando Playlist | " + playlistInfo.title);
+
+        for (const video of videos) {
+            const videoUrl = `https://www.youtube.com/watch?v=${video.id}`;
+            await downloadVideo(videoUrl);
+        }
+    } catch (err) {
+        console.error('Erro ao baixar a lista de reprodução:', err);
+    }
+}
+
 function getVideoTitle(videoUrl) {
     const videoId = ytdl.getURLVideoID(videoUrl);
     return ytdl.getInfo(videoId).then((info) => {
@@ -57,7 +77,13 @@ fs.readFile(inputFile, 'utf8', async (err, data) => {
     const urls = data.trim().split('\r\n');
     for (const url of urls) {
         if (url != '') {
-            await downloadVideo(url);
+            if (url.includes('list=')) {
+                // Se a URL contém "list=", é uma lista de reprodução
+                await downloadPlaylist(url);
+            } else {
+                // Caso contrário, é um vídeo único
+                await downloadVideo(url);
+            }
         }
     }
     console.log('✅ Downloads concluídos com sucesso!')
