@@ -23,7 +23,10 @@ if (!fs.existsSync(outputDirectory)) {
 }
 
 function getSafeFileName(title) {
-    return title.replace(/[^\p{L}\d\s-]/gu, '').replace(/\s+/g, ' ');
+    if (title) {
+        return title.replace(/[^\p{L}\d\s-]/gu, '').replace(/\s+/g, ' ');
+    }
+    return title;
 }
 
 async function downloadVideo(url, playlist) {
@@ -63,14 +66,26 @@ async function downloadVideo(url, playlist) {
 
 async function downloadPlaylist(playlistUrl) {
     try {
-        const playlistInfo = await ytpl(playlistUrl);
-        const videos = playlistInfo.items;
-        console.log("📄 Baixando Playlist | " + playlistInfo.title);
+        let nextPageToken = null;
 
-        for (const video of videos) {
-            const videoUrl = `https://www.youtube.com/watch?v=${video.id}`;
-            await downloadVideo(videoUrl, playlistInfo.title);
-        }
+        do {
+            const playlistInfo = await ytpl(playlistUrl, { pages: Infinity, limit: 100, nextpageRef: nextPageToken });
+            const videos = playlistInfo.items;
+            console.log("📄 Baixando Playlist | " + playlistInfo.title);
+
+            if (playlistInfo.isMixed) {
+                console.log('Esta é uma lista de reprodução automática do YouTube (mix). Não é suportada.');
+                return;
+            }
+
+            for (const video of videos) {
+                const videoUrl = `https://www.youtube.com/watch?v=${video.id}`;
+                await downloadVideo(videoUrl, playlistInfo.title);
+            }
+
+            nextPageToken = playlistInfo.nextPageToken;
+        } while (nextPageToken);
+
     } catch (err) {
         console.error('Erro ao baixar a lista de reprodução:', err);
     }
