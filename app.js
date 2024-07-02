@@ -1,15 +1,7 @@
 const fs = require('fs');
 const ytdl = require('ytdl-core');
 const ytpl = require('ytpl');
-
-type = "audio"; // video/audio
-
-let filetype = 'mp3';
-let quality = 'highestaudio';
-if (type == "video") {
-    filetype = 'mp4';
-    quality = 'highest';
-}
+const ffmpeg = require('fluent-ffmpeg');
 
 const inputFile = 'urls.txt';
 if (!fs.existsSync(inputFile)) {
@@ -39,26 +31,61 @@ async function downloadVideo(url, playlist) {
 
     try {
         const title = getSafeFileName(await getVideoTitle(url));
-        const outputFilePath = `${outputDirectory}${playlist}${title}.${filetype}`; // Nome do arquivo de saída com o título do vídeo
+        console.log("=================================================================");
+        console.log("🎞️  Baixando conteúdo | " + title);
 
-        console.log(`${title} | ⏳ Baixando vídeo`);
+        const videoOutputPath = `${outputDirectory}${playlist}~${title}.video.mp4`; // Temporário arquivo de vídeo
+        const audioOutputPath = `${outputDirectory}${playlist}${title}.mp3`;
+        const finalOutputPath = `${outputDirectory}${playlist}${title}.mp4`; // Arquivo final
 
-        const stream = ytdl(url, { quality });
-        const writeStream = fs.createWriteStream(outputFilePath);
+        console.log(`🎥 Baixando arquivo de vídeo`);
 
-        stream.pipe(writeStream);
+        const videoStream = ytdl(url, { quality: 'highestvideo' });
+        const videoWriteStream = fs.createWriteStream(videoOutputPath);
+        videoStream.pipe(videoWriteStream);
+        await new Promise((resolve, reject) => {
+            videoWriteStream.on('finish', resolve);
+            videoWriteStream.on('error', reject);
+        });
+
+
+        console.log(`🎶 Baixando arquivo de áudio`);
+
+        const audioStream = ytdl(url, { quality: 'highestaudio' });
+        const audioWriteStream = fs.createWriteStream(audioOutputPath);
+        audioStream.pipe(audioWriteStream);
+        await new Promise((resolve, reject) => {
+            audioWriteStream.on('finish', resolve);
+            audioWriteStream.on('error', reject);
+        });
+
+        console.log(`🎥➕🎶 Combinando áudio e vídeo`);
 
         await new Promise((resolve, reject) => {
-            stream.on('end', () => {
-                console.log(`${title} | ✔️  Download concluído`);
-                resolve();
-            });
+            ffmpeg()
+                .input(videoOutputPath)
+                .input(audioOutputPath)
+                .output(finalOutputPath)
+                .on('progress', (progress) => {
+                    const percent = (progress.percent || 0).toFixed(2);
 
-            stream.on('error', (err) => {
-                console.error(`${title} | ❌ Erro ao baixar o vídeo:`, err);
-                reject(err);
-            });
+                    process.stdout.clearLine();
+                    process.stdout.cursorTo(0);
+                    process.stdout.write(`⏳ Convertendo: ${percent}%`);
+                })
+                .on('end', () => {
+                    console.log(`✔️  Download concluído`);
+                    //fs.unlinkSync(videoOutputPath);
+                    fs.unlinkSync(audioOutputPath);
+                    resolve();
+                })
+                .on('error', (err) => {
+                    console.error(`❌ Erro ao combinar vídeo e áudio:`, err);
+                    reject(err);
+                })
+                .run();
         });
+
     } catch (err) {
         console.error('Erro durante o download:', err);
     }
@@ -71,6 +98,7 @@ async function downloadPlaylist(playlistUrl) {
         do {
             const playlistInfo = await ytpl(playlistUrl, { pages: Infinity, limit: 100, nextpageRef: nextPageToken });
             const videos = playlistInfo.items;
+            console.log("=================================================================");
             console.log("📄 Baixando Playlist | " + playlistInfo.title);
 
             if (playlistInfo.isMixed) {
