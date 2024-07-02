@@ -22,6 +22,8 @@ function getSafeFileName(title) {
 }
 
 async function downloadVideo(url, playlist) {
+    let downloaded;
+
     playlist = getSafeFileName(playlist);
     playlist = (playlist ? `${playlist}/` : '');
 
@@ -39,27 +41,56 @@ async function downloadVideo(url, playlist) {
         const finalOutputPath = `${outputDirectory}${playlist}${title}.mp4`; // Arquivo final
 
         console.log(`🎥 Baixando arquivo de vídeo`);
+        downloaded = 0;
 
-        const videoStream = ytdl(url, { quality: 'highestvideo' });
-        const videoWriteStream = fs.createWriteStream(videoOutputPath);
-        videoStream.pipe(videoWriteStream);
         await new Promise((resolve, reject) => {
+            const videoStream = ytdl(url, { quality: 'highestvideo' });
+            const videoWriteStream = fs.createWriteStream(videoOutputPath);
+
+            videoStream.pipe(videoWriteStream);
+
+            videoStream.on('data', (chunk) => {
+                downloaded += chunk.length;
+
+                process.stdout.clearLine();
+                process.stdout.cursorTo(0);
+                process.stdout.write(`⏳ Baixando: ${(downloaded / (1024 * 1024)).toFixed(2)} MB`);
+            });
+
             videoWriteStream.on('finish', resolve);
             videoWriteStream.on('error', reject);
         });
 
+        process.stdout.clearLine();
+        process.stdout.cursorTo(0);
+        console.log(`✔️  Baixado: ${(downloaded / (1024 * 1024)).toFixed(2)} MB`);
+
 
         console.log(`🎶 Baixando arquivo de áudio`);
+        downloaded = 0;
 
-        const audioStream = ytdl(url, { quality: 'highestaudio' });
-        const audioWriteStream = fs.createWriteStream(audioOutputPath);
-        audioStream.pipe(audioWriteStream);
         await new Promise((resolve, reject) => {
+            const audioStream = ytdl(url, { quality: 'highestaudio' });
+            const audioWriteStream = fs.createWriteStream(audioOutputPath);
+
+            audioStream.on('data', (chunk) => {
+                downloaded += chunk.length;
+
+                process.stdout.clearLine();
+                process.stdout.cursorTo(0);
+                process.stdout.write(`⏳ Baixando: ${(downloaded / (1024 * 1024)).toFixed(2)} MB`);
+            });
+
+            audioStream.pipe(audioWriteStream);
             audioWriteStream.on('finish', resolve);
             audioWriteStream.on('error', reject);
         });
 
-        console.log(`🎥➕🎶 Combinando áudio e vídeo`);
+        process.stdout.clearLine();
+        process.stdout.cursorTo(0);
+        console.log(`✔️  Baixado: ${(downloaded / (1024 * 1024)).toFixed(2)} MB`);
+
+        console.log(`🎥🎶 Combinando áudio e vídeo`);
 
         await new Promise((resolve, reject) => {
             ffmpeg()
@@ -85,6 +116,9 @@ async function downloadVideo(url, playlist) {
                 })
                 .run();
         });
+
+        process.stdout.clearLine();
+        process.stdout.cursorTo(0);
 
     } catch (err) {
         console.error('Erro durante o download:', err);
