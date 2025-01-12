@@ -2,9 +2,12 @@
   "name": "yt-downloader",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "electron .",
+    "dev": "electron .",
+    "build": "electron-packager . MyApp --platform=win32 --arch=x64 --out=dist --overwrite",
+    "build:all": "electron-packager . MyApp --platform=all --arch=all --out=dist --overwrite",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -14,5 +17,8 @@
     "express": "^4.18.2",
     "ytdl-core": "npm:@distube/ytdl-core@^4.15.8",
     "ytpl": "^2.3.0"
+  },
+  "devDependencies": {
+    "electron": "^33.3.1"
   }
 }

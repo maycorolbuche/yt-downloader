@@ -1,0 +1,287 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body,
+html {
+    height: 100%;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    font-size: 13px;
+}
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #F0F0F0;
+    text-align: center;
+    padding: 15px;
+    z-index: 1000;
+    box-shadow: 0px 2px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #F0F0F0;
+    text-align: center;
+    padding: 10px 0;
+    z-index: 1000;
+    box-shadow: 0px -2px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+.main {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+#loading .spinner {
+    z-index: 999;
+}
+
+#loading .bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    opacity: .2;
+}
+
+.separator {
+    height: 100%;
+    min-height: 30px;
+    width: 1px;
+    background: #CCC;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+a {
+    text-decoration: none;
+    color: #5ca9f3;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+input[type="text"],
+select {
+    padding: 10px 32px 10px 10px;
+    border: 1px solid #BBB;
+    border-radius: 5px;
+}
+
+select {
+    padding: 10px 4px;
+}
+
+
+button.svg {
+    background-color: transparent;
+    border: none;
+    color: #5F5F5F;
+    padding: 2px 6px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease-in-out;
+}
+
+button.svg svg {
+    fill: #5F5F5F;
+    transition: fill 0.3s ease-in-out;
+    width: 28px;
+}
+
+button.svg:hover svg {
+    fill: #5ca9f3;
+}
+
+button.svg.danger:hover svg {
+    fill: red;
+}
+
+input[type='radio'] {
+    display: none;
+}
+
+.radio-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 7px;
+}
+
+.custom-radio {
+    border: 1px solid #AAA;
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-content: center;
+    border-radius: 50%;
+}
+
+.custom-radio,
+span {
+    transition: 0.5s ease;
+    color: #5F5F5F;
+}
+
+.custom-radio span {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: #AAA;
+    border-radius: 50%;
+}
+
+input[type='radio']:checked+.custom-radio {
+    border-color: #5ca9f3;
+}
+
+input[type='radio']:checked+.custom-radio span {
+    background: #5ca9f3;
+}
+
+
+input[type='radio']:disabled+.custom-radio {
+    border-color: #DDD;
+}
+
+input[type='radio']:disabled+.custom-radio span {
+    background: #DDD;
+}
+
+input[type='radio']:disabled+.custom-radio+.label {
+    color: #DDD !important;
+}
+
+
+.radio-container .label {
+    padding-left: 7px;
+}
+
+
+.item-download {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    background-image: linear-gradient(to bottom, #E3E3E3, #ECECEC);
+    border-bottom: 1px solid #CCC;
+}
+
+.item-download.downloading,
+.item-download.started {
+    background: #f9f7a9;
+}
+
+.item-download.success {
+    background-image: linear-gradient(to bottom, #E3E3E3, #ECECEC);
+}
+
+.item-download.error {
+    background: #f5bfbf;
+}
+
+.item-download .btWait,
+.item-download .btSuccess {
+    display: none;
+}
+
+.item-download.started .btWait,
+.item-download.downloading .btWait {
+    display: block;
+}
+
+.item-download.success .btSuccess {
+    display: block;
+}
+
+.item-download.started .btClose,
+.item-download.downloading .btClose,
+.item-download.success .btClose {
+    display: none;
+}
+
+.cover img {
+    width: 100px;
+    height: 70px;
+    background: #000;
+    object-fit: cover;
+}
+
+.item-download .info {
+    flex: 1;
+    padding: 0 10px 0 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.item-download .info .video-title {
+    padding: 6px 0
+}
+
+.item-download .info .badge {
+    padding: 3px 10px;
+    background: #DDD;
+    border: 1px solid #AAA;
+    color: #777;
+    border-radius: 7px;
+}
+
+.item-download .info .right {
+    float: right;
+}
+
+.item-download .info .progress {
+    background: #CCC;
+    width: 100%;
+    height: 5px;
+    margin-top: 4px;
+}
+
+.item-download .info .progress-value {
+    height: 100%;
+    background: #60ff00;
+}
