@@ -30,7 +30,7 @@ app.on("ready", () => {
       preload: path.join(__dirname, "preload.js"),
     },
     autoHideMenuBar: true,
-    icon: path.join(__dirname, "images/icon.png"),
+    icon: path.join(__dirname, "assets/icon.png"),
   });
   mainWindow.maximize();
   mainWindow.show();

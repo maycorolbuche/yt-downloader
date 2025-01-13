@@ -6,9 +6,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
-    "build": "electron-packager . MyApp --platform=win32 --arch=x64 --out=dist --overwrite",
-    "build:all": "electron-packager . MyApp --platform=all --arch=all --out=dist --overwrite",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "electron-builder"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +18,7 @@
     "ytpl": "^2.3.0"
   },
   "devDependencies": {
-    "electron": "^33.3.1"
+    "electron": "^33.3.1",
+    "electron-builder": "^25.1.8"
   }
 }
