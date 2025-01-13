@@ -4,12 +4,17 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("electronAPI", {
   // SEND
   getClipboard: () => ipcRenderer.send("get-clipboard"),
+  getDirectory: () => ipcRenderer.send("get-directory"),
+  changeDirectory: () => ipcRenderer.send("change-directory"),
+  openDirectory: () => ipcRenderer.send("open-directory"),
   validateLink: (url) => ipcRenderer.send("validate-link", url),
   download: (data) => ipcRenderer.send("download", data),
 
   //ON
   onClipboardResponse: (callback) =>
     ipcRenderer.on("get-clipboard-response", (event, text) => callback(text)),
+  onDirectoryResponse: (callback) =>
+    ipcRenderer.on("get-directory-response", (event, text) => callback(text)),
   onError: (callback) =>
     ipcRenderer.on("error", (event, text) => callback(text)),
   onInfoLink: (callback) =>

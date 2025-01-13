@@ -56,6 +56,9 @@ function videoBar(data) {
                 <img src="${data.thumb}">
             </div>
             <div class="info">
+                <span class="video-playlist">
+                    ${data.playlist}
+                </span>
                 <a href="${data.url}" target="_blank" class="video-title">
                     ${data.title}
                 </a>
@@ -123,12 +126,22 @@ function closeItem(id) {
   if (el) el.remove();
 }
 adjust();
+window.electronAPI.getDirectory();
 var item = null;
 
 /* ***************************************************************************************** */
 
 document.getElementById("pasteButton").addEventListener("click", () => {
   window.electronAPI.getClipboard();
+});
+
+document
+  .getElementById("changeDirectoryButton")
+  .addEventListener("click", () => {
+    window.electronAPI.changeDirectory();
+  });
+document.getElementById("openDirectoryButton").addEventListener("click", () => {
+  window.electronAPI.openDirectory();
 });
 
 document
@@ -192,6 +205,9 @@ window.electronAPI.onClipboardResponse((clipboardText) => {
   document.getElementById("urlInput").focus();
   document.getElementById("urlInput").value = clipboardText;
   document.getElementById("urlInput").blur();
+});
+window.electronAPI.onDirectoryResponse((dir) => {
+  document.getElementById("directoryInfo").innerHTML = dir;
 });
 window.electronAPI.onDownloaded((data) => {
   console.log(data);

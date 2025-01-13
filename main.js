@@ -6,6 +6,23 @@ const fs = require("fs");
 
 let mainWindow;
 
+function saveDirectory(value) {
+  const tempDir = require("os").tmpdir();
+  const filePath = path.join(tempDir, "yt-downloader.json");
+  console.log("Salvo em", filePath);
+  fs.writeFileSync(filePath, JSON.stringify({ dir: value }));
+}
+function readDirectory() {
+  const tempDir = require("os").tmpdir();
+  const filePath = path.join(tempDir, "yt-downloader.json");
+  try {
+    const data = fs.readFileSync(filePath);
+    return path.join(JSON.parse(data).dir);
+  } catch (error) {
+    return path.join(app.getAppPath(), "media");
+  }
+}
+
 app.on("ready", () => {
   mainWindow = new BrowserWindow({
     show: false,
@@ -13,6 +30,7 @@ app.on("ready", () => {
       preload: path.join(__dirname, "preload.js"),
     },
     autoHideMenuBar: true,
+    icon: path.join(__dirname, "images/icon.png"),
   });
   mainWindow.maximize();
   mainWindow.show();
@@ -35,7 +53,37 @@ app.on("ready", () => {
     try {
       const text = clipboard.readText();
       event.reply("get-clipboard-response", text);
-    } catch (err) {}
+    } catch (err) {
+      console.log("Erro", err);
+    }
+  });
+  ipcMain.on("get-directory", (event) => {
+    try {
+      event.reply("get-directory-response", readDirectory());
+    } catch (err) {
+      console.log("Erro", err);
+    }
+  });
+  ipcMain.on("change-directory", (event) => {
+    try {
+      const dialog = require("node-file-dialog");
+      const config = { type: "directory" };
+      dialog(config)
+        .then((dir) => {
+          saveDirectory(dir[0]);
+          event.reply("get-directory-response", readDirectory());
+        })
+        .catch((err) => console.log(err));
+    } catch (err) {
+      console.log("Erro", err);
+    }
+  });
+  ipcMain.on("open-directory", (event) => {
+    try {
+      require("child_process").exec(`explorer "${readDirectory()}"`);
+    } catch (err) {
+      console.log("Erro", err);
+    }
   });
   ipcMain.on("validate-link", async (event, url) => {
     url = url.trim();
@@ -77,9 +125,9 @@ app.on("ready", () => {
 
       let file = `${data.title}.${ext}`;
       if (data.playlist) {
-        file = `${data.playlist}/${file}`;
+        file = path.join(data.playlist, file);
       }
-      const output = path.join("media", file);
+      const output = path.join(readDirectory(), file);
       const dir = path.dirname(output);
       if (!fs.existsSync(dir)) {
         console.log("Criando diretorio", dir);
@@ -128,8 +176,6 @@ app.on("ready", () => {
         current: (downloaded / (1024 * 1024)).toFixed(2) + " MB",
         status: "success",
       });
-
-      //event.reply("get-clipboard-response", text);
     } catch (err) {
       event.reply("downloaded", {
         ...data,

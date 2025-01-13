@@ -262,6 +262,11 @@ input[type='radio']:disabled+.custom-radio+.label {
     padding: 6px 0
 }
 
+.item-download .info .video-playlist {
+    color: #888;
+    font-size: 10px;
+}
+
 .item-download .info .badge {
     padding: 3px 10px;
     background: #DDD;
