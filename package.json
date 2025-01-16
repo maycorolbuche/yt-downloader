@@ -1,7 +1,7 @@
 {
   "name": "yt-downloader",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.1.0",
+  "description": "Download de vídeos do Youtube.",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -9,8 +9,15 @@
     "build": "electron-builder"
   },
   "keywords": [],
-  "author": "",
+  "author": "Mayco Rolbuche",
   "license": "ISC",
+  "build": {
+    "appId": "com.ytdownloader.app",
+    "productName": "Youtube Downloader",
+    "win": {
+      "icon": "assets/icon.ico"
+    }
+  },
   "dependencies": {
     "express": "^4.18.2",
     "node-file-dialog": "^1.0.3",

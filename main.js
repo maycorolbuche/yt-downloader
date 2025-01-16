@@ -35,7 +35,7 @@ app.on("ready", () => {
   mainWindow.maximize();
   mainWindow.show();
 
-  mainWindow.loadFile("index.html");
+  mainWindow.loadFile("home.html");
 
   // Capturar o evento F12
   mainWindow.webContents.on("before-input-event", (event, input) => {
@@ -60,6 +60,14 @@ app.on("ready", () => {
   ipcMain.on("get-directory", (event) => {
     try {
       event.reply("get-directory-response", readDirectory());
+    } catch (err) {
+      console.log("Erro", err);
+    }
+  });
+  ipcMain.on("get-version", (event) => {
+    try {
+      const packageJson = require("./package.json");
+      event.reply("get-version-response", packageJson.version);
     } catch (err) {
       console.log("Erro", err);
     }

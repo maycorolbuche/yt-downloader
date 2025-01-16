@@ -127,6 +127,7 @@ function closeItem(id) {
 }
 adjust();
 window.electronAPI.getDirectory();
+window.electronAPI.getVersion();
 var item = null;
 
 /* ***************************************************************************************** */
@@ -208,6 +209,9 @@ window.electronAPI.onClipboardResponse((clipboardText) => {
 });
 window.electronAPI.onDirectoryResponse((dir) => {
   document.getElementById("directoryInfo").innerHTML = dir;
+});
+window.electronAPI.onVersionResponse((ver) => {
+  document.getElementById("version").innerHTML = ver;
 });
 window.electronAPI.onDownloaded((data) => {
   console.log(data);
