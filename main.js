@@ -35,7 +35,7 @@ app.on("ready", () => {
   mainWindow.maximize();
   mainWindow.show();
 
-  mainWindow.loadFile("home.html");
+  mainWindow.loadFile("index.html");
 
   // Capturar o evento F12
   mainWindow.webContents.on("before-input-event", (event, input) => {

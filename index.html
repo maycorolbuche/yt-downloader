@@ -1,1 +1,149 @@
-Teste
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download de Vídeos</title>
+    <link rel="icon" href="assets/icon.png" type="image/png">
+
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+
+<body>
+    <header>
+        <div style="display: flex;align-items: center;justify-content: center;">
+            <div style="flex:1;padding: 0 10px 0 10px;display: flex;">
+                <input type="text" id="urlInput" placeholder="Cole aqui o link do vídeo/playlist" style="width:100%">
+                <button id="loadLinkButton" class="svg spinner" style="display:none;margin-left: -35px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <title>Aguarde...</title>
+                        <path d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
+                    </svg>
+                </button>
+                <button id="pasteButton" class="svg" style="margin-left: -35px;">
+                    <svg style="width:20px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <title>Colar da Área de Transferência</title>
+                        <path
+                            d="M19,20H5V4H7V7H17V4H19M12,2A1,1 0 0,1 13,3A1,1 0 0,1 12,4A1,1 0 0,1 11,3A1,1 0 0,1 12,2M19,2H14.82C14.4,0.84 13.3,0 12,0C10.7,0 9.6,0.84 9.18,2H5A2,2 0 0,0 3,4V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V4A2,2 0 0,0 19,2Z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="info-link" style="display:none">
+            <div style="padding-top:5px;display: flex;align-items: center;justify-content: center;">
+                <div style="flex:1;padding: 0 10px 0 10px;display: flex;align-items: center;">
+                    <div class="cover">
+                        <img id="infoThumbnail" style="width:50px;height:50px;">
+                    </div>
+                    <div style="padding-left:5px; display: flex;flex-direction: column;align-items: flex-start;">
+                        <a id="infoTitle" href="" target="_blank"></a>
+                        <span id="infoChannel" style="color:#888;"></span>
+                    </div>
+                </div>
+                <div class="separator"></div>
+                <div style="padding: 0 0 0 0;display: flex;align-items: center;">
+                    <label class="radio-container">
+                        <input id="radioListV" type="radio" name="radio-list" value="V" checked />
+                        <div class="custom-radio">
+                            <span></span>
+                        </div>
+                        <span class="label">Individual</span>
+                    </label>
+                    <label class="radio-container">
+                        <input id="radioListP" type="radio" name="radio-list" value="P" />
+                        <div class="custom-radio">
+                            <span></span>
+                        </div>
+                        <span class="label">Playlist</span>
+                    </label>
+                </div>
+                <div class="separator"></div>
+                <div style="padding: 0 10px 0 10px;">
+                    <select style="width:150px;" id="formatMedia">
+                        <option value="mp4">Vídeo (mp4)</option>
+                        <option value="mp3">Áudio (mp3)</option>
+                        <!--
+                        <optgroup label="Vídeo">
+                            <option>mp4 | alta qualidade</option>
+                            <option>mp4 | baixa qualidade</option>
+                        </optgroup>
+                        <optgroup label="Áudio">
+                            <option>mp3 | alta qualidade</option>
+                            <option>mp3 | baixa qualidade</option>
+                        </optgroup>
+                    -->
+                    </select>
+                </div>
+                <div class="separator"></div>
+                <div style="padding: 0 10px 0 1px;">
+                    <button id="downloadButton" class="svg">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <title>Fazer Download</title>
+                            <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="videoList" class="main">
+    </div>
+
+    <footer>
+
+        <div style="display: flex;align-items: center;justify-content: center;">
+            <div
+                style="flex:1;padding: 0 10px 0 10px;display: flex;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">
+                <b>Saída:</b>&nbsp;
+                <span id="directoryInfo" style="color:#000">
+                    ....
+                </span>
+            </div>
+            <div>
+                <button id="changeDirectoryButton" class="svg">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <title>Alterar Diretório</title>
+                        <path
+                            d="M4 18H12.13L11 19.13V20H4C2.9 20 2 19.11 2 18V6C2 4.89 2.89 4 4 4H10L12 6H20C21.1 6 22 6.89 22 8V10.15C21.74 10.06 21.46 10 21.17 10C20.75 10 20.36 10.11 20 10.3V8H4V18M22.85 13.47L21.53 12.15C21.33 11.95 21 11.95 20.81 12.15L19.83 13.13L21.87 15.17L22.85 14.19C23.05 14 23.05 13.67 22.85 13.47M13 19.96V22H15.04L21.17 15.88L19.13 13.83L13 19.96Z" />
+                    </svg>
+                </button>
+            </div>
+            <div class="separator"></div>
+            <div>
+                <button id="openDirectoryButton" class="svg">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <title>Abrir Diretório</title>
+                        <path
+                            d="M6.1,10L4,18V8H21A2,2 0 0,0 19,6H12L10,4H4A2,2 0 0,0 2,6V18A2,2 0 0,0 4,20H19C19.9,20 20.7,19.4 20.9,18.5L23.2,10H6.1M19,18H6L7.6,12H20.6L19,18Z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div style="border-top: 1px solid #CCC;padding: 3px 10px 0 10px;font-size:11px">
+            <div style="float:left;">
+                <b>Versão:</b> <span id="version">0.0.0</span>
+            </div>
+            <div style="float:right">
+                <b>Desenvolvedor:</b> Mayco Rolbuche | <a
+                    href="https://maycorolbuche.com.br">https://maycorolbuche.com.br</a>
+            </div>
+        </div>
+    </footer>
+
+    <div id="loading" style="display: none;">
+        <div class="spinner">
+            <svg style="width: 30px;height: 30px;fill: #FFF;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>Aguarde...</title>
+                <path d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
+            </svg>
+        </div>
+        <div class="bg"></div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+
+</html>
