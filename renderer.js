@@ -116,9 +116,27 @@ function download() {
     title: item.getAttribute("data-title"),
     playlist: item.getAttribute("data-playlist"),
     type: item.getAttribute("data-type"),
+    directory: getDir(),
   };
   console.log(data);
   window.electronAPI.download(data);
+}
+
+function saveDir(dir) {
+  localStorage.setItem("directory", dir);
+  writeDir();
+}
+function getDir() {
+  const directory = localStorage.getItem("directory");
+  if (directory) {
+    return directory;
+  } else {
+    return window.electronAPI.getDefDirectory();
+  }
+}
+
+function writeDir() {
+  document.getElementById("directoryInfo").innerHTML = getDir();
 }
 
 function closeItem(id) {
@@ -126,7 +144,7 @@ function closeItem(id) {
   if (el) el.remove();
 }
 adjust();
-window.electronAPI.getDirectory();
+writeDir();
 window.electronAPI.getVersion();
 var item = null;
 
@@ -142,7 +160,7 @@ document
     window.electronAPI.changeDirectory();
   });
 document.getElementById("openDirectoryButton").addEventListener("click", () => {
-  window.electronAPI.openDirectory();
+  window.electronAPI.openDirectory(getDir());
 });
 
 document
@@ -208,10 +226,15 @@ window.electronAPI.onClipboardResponse((clipboardText) => {
   document.getElementById("urlInput").blur();
 });
 window.electronAPI.onDirectoryResponse((dir) => {
-  document.getElementById("directoryInfo").innerHTML = dir;
+  saveDir(dir);
 });
-window.electronAPI.onVersionResponse((ver) => {
-  document.getElementById("version").innerHTML = ver;
+window.electronAPI.onVersionResponse((data) => {
+  console.log(data);
+  document.getElementById("version").innerHTML = data.version;
+  if (data.server && data.version != data.server) {
+    document.getElementById("hasNewVersion").style.display = "block";
+    document.getElementById("newVersion").innerHTML = data.server;
+  }
 });
 window.electronAPI.onDownloaded((data) => {
   console.log(data);

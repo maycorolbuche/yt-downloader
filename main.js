@@ -3,23 +3,40 @@ const ytdl = require("ytdl-core");
 const ytpl = require("ytpl");
 const path = require("path");
 const fs = require("fs");
+const https = require("https");
 
 let mainWindow;
 
-function saveDirectory(value) {
-  const tempDir = require("os").tmpdir();
-  const filePath = path.join(tempDir, "yt-downloader.json");
-  console.log("Salvo em", filePath);
-  fs.writeFileSync(filePath, JSON.stringify({ dir: value }));
-}
-function readDirectory() {
-  const tempDir = require("os").tmpdir();
-  const filePath = path.join(tempDir, "yt-downloader.json");
+async function serverVersion() {
+  const gitPackageJsonUrl =
+    "https://raw.githubusercontent.com/maycorolbuche/yt-downloader/main/package.json";
+
   try {
-    const data = fs.readFileSync(filePath);
-    return path.join(JSON.parse(data).dir);
-  } catch (error) {
-    return path.join(app.getAppPath(), "media");
+    const response = await new Promise((resolve, reject) => {
+      const req = https.get(gitPackageJsonUrl, (res) => {
+        let data = "";
+
+        res.on("data", (chunk) => {
+          data += chunk;
+        });
+
+        res.on("end", () => {
+          resolve(data);
+        });
+      });
+
+      req.on("error", (err) => {
+        reject(err);
+      });
+    });
+
+    const remotePackageJson = JSON.parse(response);
+    const remoteVersion = remotePackageJson.version;
+
+    return remoteVersion;
+  } catch (err) {
+    console.error("Error fetching the remote package.json:", err);
+    return null;
   }
 }
 
@@ -57,38 +74,48 @@ app.on("ready", () => {
       console.log("Erro", err);
     }
   });
-  ipcMain.on("get-directory", (event) => {
+  ipcMain.on("get-default-directory", (event) => {
     try {
-      event.reply("get-directory-response", readDirectory());
+      event.reply("get-directory-response", path.join(require("os").homedir()));
     } catch (err) {
       console.log("Erro", err);
     }
   });
-  ipcMain.on("get-version", (event) => {
+  ipcMain.on("get-version", async (event) => {
     try {
       const packageJson = require("./package.json");
-      event.reply("get-version-response", packageJson.version);
+      event.reply("get-version-response", {
+        version: packageJson.version,
+        server: null,
+      });
+      event.reply("get-version-response", {
+        version: packageJson.version,
+        server: await serverVersion(),
+      });
     } catch (err) {
       console.log("Erro", err);
     }
   });
   ipcMain.on("change-directory", (event) => {
     try {
-      const dialog = require("node-file-dialog");
-      const config = { type: "directory" };
-      dialog(config)
-        .then((dir) => {
-          saveDirectory(dir[0]);
-          event.reply("get-directory-response", readDirectory());
+      console.log("change directory");
+      const { dialog } = require("electron");
+      dialog
+        .showOpenDialog(mainWindow, { properties: ["openDirectory"] })
+        .then(({ canceled, filePaths }) => {
+          if (!canceled) {
+            event.reply("get-directory-response", filePaths[0]);
+          }
         })
         .catch((err) => console.log(err));
     } catch (err) {
       console.log("Erro", err);
     }
   });
-  ipcMain.on("open-directory", (event) => {
+  ipcMain.on("open-directory", (event, directory) => {
     try {
-      require("child_process").exec(`explorer "${readDirectory()}"`);
+      console.log("directory", directory);
+      require("child_process").exec(`explorer "${directory}"`);
     } catch (err) {
       console.log("Erro", err);
     }
@@ -135,7 +162,7 @@ app.on("ready", () => {
       if (data.playlist) {
         file = path.join(data.playlist, file);
       }
-      const output = path.join(readDirectory(), file);
+      const output = path.join(data.directory, file);
       const dir = path.dirname(output);
       if (!fs.existsSync(dir)) {
         console.log("Criando diretorio", dir);
