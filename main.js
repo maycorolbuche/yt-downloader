@@ -104,7 +104,7 @@ app.on("ready", () => {
         .showOpenDialog(mainWindow, { properties: ["openDirectory"] })
         .then(({ canceled, filePaths }) => {
           if (!canceled) {
-            event.reply("get-directory-response", filePaths[0]);
+            event.reply("get-directory-response", path.join(filePaths[0]));
           }
         })
         .catch((err) => console.log(err));
